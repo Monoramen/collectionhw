@@ -2,6 +2,12 @@ package com.a2;
 
 import java.util.Objects;
 
+/**
+ * @param <K> key
+ * @param <V> value
+ * This class defines a generic hashmap
+ * Autor: Daniil Suvorkov
+ */
 public class GenHashMap<K, V> {
     static final int MAXIMUM_CAPACITY = 1 << 30;
 
@@ -48,7 +54,6 @@ public class GenHashMap<K, V> {
         }
     }
 
-
     private Node<K, V>[] table;
     private int size; //current size
 
@@ -67,26 +72,7 @@ public class GenHashMap<K, V> {
     }
 
     public GenHashMap() {
-
     }
-
-//    final Node<K, V>[] resize() {
-//        Node<K, V>[] oldTable = table;
-//        int oldCapacity = oldTable.length - 1;
-//        int newCapacity = oldCapacity * 2 + 1;
-//
-//        if (newCapacity > MAXIMUM_CAPACITY) {
-//            newCapacity = MAXIMUM_CAPACITY;
-//        }
-//        Node<K, V> newTable[] = new Node[newCapacity];
-//
-//        for (int i = 0; i < oldCapacity; i++) {
-//            newTable[i] = oldTable[i];
-//        }
-//        table = newTable;
-//
-//        return table;
-//    }
 
     public void setValue(K key, V value) {
         int index = hash(key) & (table.length - 1);
@@ -99,10 +85,20 @@ public class GenHashMap<K, V> {
         }
     }
 
-    int size() {
+    /**
+     * This method returns the number of key-value mappings in this map.
+     * @return size
+     */
+    public int size() {
         return size;
     }
 
+    /**
+     * This method adds the mapping of the specified key-value pair to this map.
+     * If the map previously contained a mapping for the key, the old value is replaced by the new value.
+     * @param key
+     * @param value
+     */
     public V put(K key, V value) {
         int index = hash(key) & (table.length - 1);
         Node<K, V> node = table[index];
