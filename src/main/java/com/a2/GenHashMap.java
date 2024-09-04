@@ -72,17 +72,9 @@ public class GenHashMap<K, V> {
     }
 
     public GenHashMap() {
-    }
-
-    public void setValue(K key, V value) {
-        int index = hash(key) & (table.length - 1);
-        Node<K, V> node = table[index];
-        while (node != null) {
-            if (node.key.equals(key)  && value.equals(node.value)) {
-                node.setValue(value);
-            }
-            node = node.next;
-        }
+        int capacity = 0;
+        Node<K, V>[] kvNode  = new Node[capacity + 1];
+        table = (Node<K, V>[]) kvNode;
     }
 
     /**
@@ -100,6 +92,9 @@ public class GenHashMap<K, V> {
      * @param value
      */
     public V put(K key, V value) {
+        if (key == null) {
+            System.out.println("Key cannot be null");
+        }
         int index = hash(key) & (table.length - 1);
         Node<K, V> node = table[index];
         while (node != null) {
@@ -125,19 +120,31 @@ public class GenHashMap<K, V> {
     /**
      * @param key
      * This method removes the mapping for the specified key from this map if present.
+     * It checks if the key exists or out of bounds
      */
     public V delete(K key) {
         if (key == null) {
-            throw new NullPointerException();
+            System.out.println("Key cannot be null");
+            return null;
         }
-        removeNode(hash(key), key, null, false);
-        return null;
+        try {
+            Node<K, V> node = removeNode(hash(key), key, null, false);
+            if (node == null) {
+                System.out.println("Key does not exist: " + key);
+            }
+            return node == null ? null : node.value;
+        } catch (IndexOutOfBoundsException e) {
+            System.out.println("Key does not exist: " + key);
+            return null;
+        }
     }
+
 
     /**
      * This method is used to get all values
      */
     public String values() {
+        checkTable();
             StringBuilder sb = new StringBuilder();
             sb.append("Values = {");
             for (int i = 0; i < table.length; i++) {
@@ -170,10 +177,17 @@ public class GenHashMap<K, V> {
         return sb.append("}").toString();
     }
 
+    private void checkTable() {
+        if (table == null) {
+            throw new UnsupportedOperationException();
+        }
+    }
     /**
      * This method is used to get all entries
      */
     public String entrySet() {
+        checkTable();
+        if(size == 0) return "HashMap = {}";
         StringBuilder sb = new StringBuilder();
         sb.append("HashMap = {");
         for (int i = 0; i < table.length; i++) {
