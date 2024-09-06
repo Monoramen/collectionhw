@@ -6,8 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class GeneHashMapTest {
 
@@ -23,6 +22,18 @@ public class GeneHashMapTest {
     void nullTableEntrysetMethodTest() {
         GenHashMap<Integer, String> list = new GenHashMap<>();
         assertEquals("HashMap = {}", list.entrySet());
+    }
+
+    @DisplayName("Test max capacity table clear Method")
+    @Test
+    void maxCapacityTableClearMethodTest() {
+        int maxCapacity = 1 << 31;
+        try {
+            GenHashMap<Integer, String> list = new GenHashMap<>(maxCapacity);
+            fail("Expected an IllegalArgumentException to be thrown");
+        } catch (IllegalArgumentException e) {
+            assertEquals(null, e.getMessage());
+        }
     }
 
     @DisplayName("Test null table keyset Method")
@@ -53,6 +64,11 @@ public class GeneHashMapTest {
             }
         }
         expected.append("}");
+        assertEquals(expected.toString(), list.entrySet());
+
+        list.clear();
+        expected = new StringBuilder();
+        expected.append("HashMap = {}");
         assertEquals(expected.toString(), list.entrySet());
     }
 
@@ -159,6 +175,65 @@ public class GeneHashMapTest {
         list.clear();
         assertEquals(null, list.get(0));
         assertEquals(null, list.get(1));
+    }
+
+
+    @DisplayName("Test size Method")
+    @Test
+    void sizeMethodTest() {
+        GenHashMap<String, String> list = new GenHashMap<>(100);
+        list.put("Key", "Value");
+        list.put("Key1", "Value1");
+        assertEquals(2, list.size());
+    }
+
+    @DisplayName("Test size with null table Method")
+    @Test
+    void sizeNullMethodTest() {
+        GenHashMap<Integer, String> list = new GenHashMap<>();
+        assertEquals(0, list.size());
+
+    }
+
+    @DisplayName("Test equals Method")
+    @Test
+    void equalsMethodTest() {
+        GenHashMap<Integer, String> list1 = new GenHashMap<>(100);
+        list1.put(0, "Value");
+        GenHashMap<Integer, String> list2 = new GenHashMap<>(100);
+        list2.put(0, "Value");
+        assertEquals(true, list1.equals(list1));
+        assertEquals(true, list1.get(0).equals(list2.get(0)));
+
+    }
+
+
+    @DisplayName("Test equals Method")
+    @Test
+    void equalsfalseMethodTest() {
+        GenHashMap<Integer, String> list1 = new GenHashMap<>(100);
+        list1.put(0, "Value");
+        GenHashMap<Integer, String> list2 = new GenHashMap<>(100);
+        list2.put(10, "ValueDiff");
+        assertEquals(false, list1.get(0).equals(list2.get(10)));
+        assertEquals(false, list1.equals(list2));
+
+    }
+
+    @DisplayName("Test toString Method")
+    @Test
+    void toStringMethodTest() {
+        GenHashMap<Integer, String> list = new GenHashMap<>(1);
+        list.put(0, "Value");
+        assertEquals("Value", list.get(0).toString());
+    }
+
+    @DisplayName("Test entryset Method")
+    @Test
+    void getKeyMethodTest() {
+        GenHashMap<Integer, String> list = new GenHashMap<>(1);
+
+
     }
 
 }

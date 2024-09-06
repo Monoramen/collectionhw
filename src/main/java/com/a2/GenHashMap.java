@@ -1,6 +1,7 @@
 package com.a2;
 
 import java.util.Objects;
+import java.util.function.Function;
 
 /**
  * @param <K> key
@@ -26,10 +27,12 @@ public class GenHashMap<K, V> {
             this.prev = prev;
         }
 
+        @Override
         public final K getKey() {
             return key;
         }
 
+        @Override
         public final V getValue() {
             return value;
         }
@@ -38,13 +41,14 @@ public class GenHashMap<K, V> {
             return key + "=" + value ;
         }
 
-
+        @Override
         public final V setValue(V newValue) {
             V oldValue = value;
             value = newValue;
             return oldValue;
         }
 
+        @Override
         public final boolean equals(Object object) {
             if (object == this) return true;
 
@@ -65,7 +69,6 @@ public class GenHashMap<K, V> {
         if (capacity > MAXIMUM_CAPACITY) {
             capacity = MAXIMUM_CAPACITY-1;
         }
-
         for (Node<K, V> kvNode : table = new Node[capacity + 1]) {
             kvNode = null;
         }
@@ -98,10 +101,8 @@ public class GenHashMap<K, V> {
         int index = hash(key) & (table.length - 1);
         Node<K, V> node = table[index];
         while (node != null) {
-            if (node.key.equals(key)) {
-                V oldValue = node.value;
-                node.value = value;
-                return oldValue;
+            if (node.equals(key)) {
+                return  node.setValue(value);
             }
             node = node.next;
         }
@@ -127,15 +128,22 @@ public class GenHashMap<K, V> {
             System.out.println("Key cannot be null");
             return null;
         }
-        try {
-            Node<K, V> node = removeNode(hash(key), key, null, false);
+        Node<K, V> node = removeNode(hash(key), key, null, false);
             if (node == null) {
                 System.out.println("Key does not exist: " + key);
             }
             return node == null ? null : node.value;
-        } catch (IndexOutOfBoundsException e) {
-            System.out.println("Key does not exist: " + key);
-            return null;
+
+    }
+    private void appendNodes(StringBuilder sb, Function<Node<K, V>, String> toStringFunction) {
+        for (int i = 0; i < table.length; i++) {
+            Node<K, V> node = table[i];
+            while (node != null) {
+                var s = toStringFunction.apply(node);
+                if (node.next == null) sb.append(s);
+                else sb.append(s + ", ");
+                node = node.next;
+            }
         }
     }
 
@@ -144,19 +152,10 @@ public class GenHashMap<K, V> {
      * This method is used to get all values
      */
     public String values() {
-        checkTable();
-            StringBuilder sb = new StringBuilder();
-            sb.append("Values = {");
-            for (int i = 0; i < table.length; i++) {
-                Node<K, V> node = table[i];
-                while (node != null) {
-                    var v = node.value.toString();
-                    if (node.next == null) sb.append(v);
-                    else sb.append(v + ", ");
-                    node = node.next;
-                }
-            }
-            return sb.append("}").toString();
+        StringBuilder sb = new StringBuilder();
+        sb.append("Values = {");
+        appendNodes(sb, node -> node.value.toString());
+        return sb.append("}").toString();
     }
 
     /**
@@ -165,40 +164,18 @@ public class GenHashMap<K, V> {
     public String keyset() {
         StringBuilder sb = new StringBuilder();
         sb.append("Keys = {");
-        for (int i = 0; i < table.length; i++) {
-            Node<K, V> node = table[i];
-            while (node != null) {
-                var k = node.key.toString();
-                if (node.next == null) sb.append(k);
-                else sb.append(k + ", ");
-                node = node.next;
-            }
-        }
+        appendNodes(sb, node -> node.key.toString());
         return sb.append("}").toString();
     }
 
-    private void checkTable() {
-        if (table == null) {
-            throw new UnsupportedOperationException();
-        }
-    }
     /**
      * This method is used to get all entries
      */
     public String entrySet() {
-        checkTable();
         if(size == 0) return "HashMap = {}";
         StringBuilder sb = new StringBuilder();
         sb.append("HashMap = {");
-        for (int i = 0; i < table.length; i++) {
-            Node<K, V> node = table[i];
-            while (node != null) {
-                var s = node.toString();
-                if (node.next == null) sb.append(s);
-                else sb.append(s + ", ");
-                node = node.next;
-            }
-        }
+        appendNodes(sb, Node::toString);
         return sb.append("}").toString();
     }
 
@@ -213,20 +190,6 @@ public class GenHashMap<K, V> {
                 tab[i] = null;
             }
         }
-    }
-
-    private void add(Node<K, V> node) {
-        int index = hash(node.key) & (table.length - 1);
-        Node<K, V> current = table[index];
-        while (current != null) {
-            if (current.key.equals(node.key)) {
-                throw new IllegalArgumentException("Key already exists: " + node.key);
-            }
-            current = current.next;
-        }
-        node.next = table[index];
-        table[index] = node;
-        size++;
     }
 
     private int hash(K key) {
