@@ -79,9 +79,9 @@ public class GenHashMap<K, V> {
         else if (capacity == 0) {
             capacity = DEFAULT_CAPACITY;
         }
-        for (Node<K, V> kvNode : table = new Node[capacity]) {
-            kvNode = null;
-        }
+
+        Node<K, V>[] kvNode  = new Node[capacity];
+        table = (Node<K, V>[]) kvNode;
     }
 
     public GenHashMap() {
@@ -98,6 +98,13 @@ public class GenHashMap<K, V> {
         return size;
     }
 
+    private boolean checkKeyByNull(K key) {
+        if (key == null) {
+            System.out.println("Key cannot be null");
+            return true;
+        }
+        return false;
+    }
     /**
      * This method adds the mapping of the specified key-value pair to this map.
      * If the map previously contained a mapping for the key, the old value is replaced by the new value.
@@ -105,8 +112,8 @@ public class GenHashMap<K, V> {
      * @param value
      */
     public V put(K key, V value) {
-        if (key == null) {
-            System.out.println("Key cannot be null");
+        if (!checkKeyByNull(key)){
+            return null;
         }
         int index = hash(key) & (table.length - 1);
         Node<K, V> node = table[index];
@@ -129,8 +136,7 @@ public class GenHashMap<K, V> {
      * @return value of the key or throws exception if not found
      */
     public V get(K key) throws NullPointerException {
-        if (key == null) {
-            System.out.println("Key cannot be null");
+        if (!checkKeyByNull(key)){
             return null;
         }
         int index = hash(key) & (table.length - 1);
