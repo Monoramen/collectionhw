@@ -54,8 +54,9 @@ public class GeneHashMapTest {
     @Test
     void minCapacityTableClearMethodTest() {
         int maxCapacity = -10;
+
         try {
-            GenHashMap<Integer, String> list = new GenHashMap<>(maxCapacity);
+            GenHashMap<Integer, String> map = new GenHashMap<>(maxCapacity);
             fail("Expected an IllegalArgumentException to be thrown");
         } catch (IllegalArgumentException e) {
             assertEquals(null, e.getMessage());
@@ -217,7 +218,10 @@ public class GeneHashMapTest {
         list.put(0, "Zero");
         list.put(1, "One");
         assertEquals("Values = {Zero, One}", list.values());
-    }
+        list.put(0, "Two");
+
+        assertEquals("Values = {Two, One}", list.values());}
+
 
     @DisplayName("Test values Method")
     @Test

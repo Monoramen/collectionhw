@@ -67,7 +67,7 @@ public class GenHashMap<K, V> {
     }
 
     private Node<K, V>[] table;
-    private int size;
+    private int size; //current size
 
     public GenHashMap(int capacity) {
         if (capacity < 0) {
@@ -79,15 +79,15 @@ public class GenHashMap<K, V> {
         else if (capacity == 0) {
             capacity = DEFAULT_CAPACITY;
         }
-
-        Node<K, V>[] kvNode  = new Node[capacity];
-        table =  kvNode;
+        Node<K, V> [] kvNode = new Node[capacity];
+        this.table = kvNode;
     }
 
     public GenHashMap() {
         int capacity = DEFAULT_CAPACITY;
         Node<K, V>[] kvNode  = new Node[capacity];
-        table = kvNode;
+        this.table = kvNode;
+
     }
 
     /**
@@ -98,13 +98,6 @@ public class GenHashMap<K, V> {
         return size;
     }
 
-    private boolean checkKeyByNull(K key) {
-        if (key == null) {
-            System.out.println("Key cannot be null");
-            return true;
-        }
-        return false;
-    }
     /**
      * This method adds the mapping of the specified key-value pair to this map.
      * If the map previously contained a mapping for the key, the old value is replaced by the new value.
@@ -112,13 +105,13 @@ public class GenHashMap<K, V> {
      * @param value
      */
     public V put(K key, V value) {
-        if (!checkKeyByNull(key)){
-            return  (V) null;
+        if (key == null) {
+            System.out.println("Key cannot be null");
         }
         int index = hash(key) & (table.length - 1);
         Node<K, V> node = table[index];
         while (node != null) {
-            if (node.equals(key) ) {
+            if (node.key.equals(key) ) {
                 return  node.setValue(value);
             }
             node = node.next;
@@ -127,7 +120,7 @@ public class GenHashMap<K, V> {
         node.next = table[index];
         table[index] = node;
         size++;
-        return (V) null;
+        return null;
     }
 
     /**
@@ -136,7 +129,8 @@ public class GenHashMap<K, V> {
      * @return value of the key or throws exception if not found
      */
     public V get(K key) throws NullPointerException {
-        if (!checkKeyByNull(key)){
+        if (key == null) {
+            System.out.println("Key cannot be null");
             return null;
         }
         int index = hash(key) & (table.length - 1);
@@ -157,7 +151,8 @@ public class GenHashMap<K, V> {
      * @param key
      */
     public V delete(K key) {
-        if (!checkKeyByNull(key)){
+        if (key == null) {
+            System.out.println("Key cannot be null");
             return null;
         }
         Node<K, V> node = removeNode(hash(key), key, null, false);
@@ -244,7 +239,7 @@ public class GenHashMap<K, V> {
         if ((tab = table) != null && (n = tab.length) > 0 &&
             (current = tab[index = (n - 1) & hash]) != null) {
             Node<K, V> node = null, element; // link to be deleted
-            K k = current.key;
+            K k = current.getKey();
             V v ;
 
             if (current.hash == hash && (k = current.key) == key || key != null && key.equals(k)) {
