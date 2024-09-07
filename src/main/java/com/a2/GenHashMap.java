@@ -1,5 +1,6 @@
 package com.a2;
 
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -10,7 +11,9 @@ import java.util.function.Function;
  * Autor: Daniil Suvorkov
  */
 public class GenHashMap<K, V> {
-    static final int MAXIMUM_CAPACITY = 1 << 30;
+    static final int MAXIMUM_CAPACITY = 1 << 24;
+    private static final int DEFAULT_CAPACITY = 16;
+
 
     private static class Node<K, V> implements MapEntry<K, V> {
         public final int hash;
@@ -37,9 +40,11 @@ public class GenHashMap<K, V> {
             return value;
         }
 
+        @Override
         public final String toString() {
-            return key + "=" + value ;
+            return Objects.toString(key) + "=" + Objects.toString(value);
         }
+
 
         @Override
         public final V setValue(V newValue) {
@@ -50,33 +55,38 @@ public class GenHashMap<K, V> {
 
         @Override
         public final boolean equals(Object object) {
-            if (object == this) return true;
+            if (this == object) return true;
+            if (!(object instanceof Node<?, ?> otherNode)) return false;
+            return Objects.equals(key, otherNode.key) && Objects.equals(value, otherNode.value);
+        }
 
-            return object instanceof MapEntry<?, ?> element
-                && Objects.equals(key, element.getKey())
-                && Objects.equals(key, element.getValue());
+        @Override
+        public final int hashCode() {
+            return Objects.hash(key, value);
         }
     }
 
     private Node<K, V>[] table;
     private int size; //current size
 
-
     public GenHashMap(int capacity) {
         if (capacity < 0) {
             throw new IllegalArgumentException();
         }
         if (capacity > MAXIMUM_CAPACITY) {
-            capacity = MAXIMUM_CAPACITY-1;
+            capacity = MAXIMUM_CAPACITY;
         }
-        for (Node<K, V> kvNode : table = new Node[capacity + 1]) {
+        else if (capacity == 0) {
+            capacity = DEFAULT_CAPACITY;
+        }
+        for (Node<K, V> kvNode : table = new Node[capacity]) {
             kvNode = null;
         }
     }
 
     public GenHashMap() {
-        int capacity = 0;
-        Node<K, V>[] kvNode  = new Node[capacity + 1];
+        int capacity = DEFAULT_CAPACITY;
+        Node<K, V>[] kvNode  = new Node[capacity];
         table = (Node<K, V>[]) kvNode;
     }
 
@@ -101,7 +111,7 @@ public class GenHashMap<K, V> {
         int index = hash(key) & (table.length - 1);
         Node<K, V> node = table[index];
         while (node != null) {
-            if (node.equals(key)) {
+            if (node.equals(key) ) {
                 return  node.setValue(value);
             }
             node = node.next;
@@ -113,15 +123,32 @@ public class GenHashMap<K, V> {
         return null;
     }
 
-    public V get(K key) {
-        Node<K, V> element;
-        return (element = getNodeForKey(key)) == null ? null : element.value;
+    /**
+     * This method returns the value to which the specified key is mapped.
+     * @param key
+     * @return value of the key or throws exception if not found
+     */
+    public V get(K key) throws NullPointerException {
+        if (key == null) {
+            System.out.println("Key cannot be null");
+            return null;
+        }
+        int index = hash(key) & (table.length - 1);
+        Node<K, V> current = table[index];
+
+        while (current != null) {
+            if (current.getKey().equals(key)) {
+                return current.getValue();
+            }
+            current = current.next;
+        }
+        throw new NoSuchElementException("Key " + key + " not found");
     }
 
     /**
-     * @param key
      * This method removes the mapping for the specified key from this map if present.
      * It checks if the key exists or out of bounds
+     * @param key
      */
     public V delete(K key) {
         if (key == null) {
@@ -133,20 +160,22 @@ public class GenHashMap<K, V> {
                 System.out.println("Key does not exist: " + key);
             }
             return node == null ? null : node.value;
-
     }
+
     private void appendNodes(StringBuilder sb, Function<Node<K, V>, String> toStringFunction) {
+        boolean first = true;
         for (int i = 0; i < table.length; i++) {
             Node<K, V> node = table[i];
             while (node != null) {
-                var s = toStringFunction.apply(node);
-                if (node.next == null) sb.append(s);
-                else sb.append(s + ", ");
+                if (!first) {
+                    sb.append(", ");
+                }
+                sb.append(toStringFunction.apply(node));
+                first = false;
                 node = node.next;
             }
         }
     }
-
 
     /**
      * This method is used to get all values
@@ -193,20 +222,7 @@ public class GenHashMap<K, V> {
     }
 
     private int hash(K key) {
-        int hash;
-        return (key == null) ? 0 : (hash = key.hashCode()) ^ (hash >>> 16);
-    }
-
-    private Node<K, V> getNodeForKey(K key) {
-        int index = hash(key) & (table.length - 1); //index for key
-        Node<K, V> current = table[index];
-        while (current != null) {
-            if (current.key == key) {
-                return current;
-            }
-            current = current.next;
-        }
-        return null;
+        return (key == null) ? 0 : (key.hashCode() ^ (key.hashCode() >>> 16));
     }
 
     /**
@@ -234,7 +250,7 @@ public class GenHashMap<K, V> {
                         node = element;
                         break;
                     }
-                    current = element;
+                        current = element;
                 }
             }
             if (node != null && ( !matchValue || (v = node.value) == value ||
