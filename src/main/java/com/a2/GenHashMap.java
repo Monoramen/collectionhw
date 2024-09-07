@@ -67,7 +67,7 @@ public class GenHashMap<K, V> {
     }
 
     private Node<K, V>[] table;
-    private int size; //current size
+    private int size;
 
     public GenHashMap(int capacity) {
         if (capacity < 0) {
@@ -81,13 +81,13 @@ public class GenHashMap<K, V> {
         }
 
         Node<K, V>[] kvNode  = new Node[capacity];
-        table = (Node<K, V>[]) kvNode;
+        table =  kvNode;
     }
 
     public GenHashMap() {
         int capacity = DEFAULT_CAPACITY;
         Node<K, V>[] kvNode  = new Node[capacity];
-        table = (Node<K, V>[]) kvNode;
+        table = kvNode;
     }
 
     /**
@@ -113,7 +113,7 @@ public class GenHashMap<K, V> {
      */
     public V put(K key, V value) {
         if (!checkKeyByNull(key)){
-            return null;
+            return  (V) null;
         }
         int index = hash(key) & (table.length - 1);
         Node<K, V> node = table[index];
@@ -127,7 +127,7 @@ public class GenHashMap<K, V> {
         node.next = table[index];
         table[index] = node;
         size++;
-        return null;
+        return (V) null;
     }
 
     /**
@@ -157,8 +157,7 @@ public class GenHashMap<K, V> {
      * @param key
      */
     public V delete(K key) {
-        if (key == null) {
-            System.out.println("Key cannot be null");
+        if (!checkKeyByNull(key)){
             return null;
         }
         Node<K, V> node = removeNode(hash(key), key, null, false);
